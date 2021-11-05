@@ -50,20 +50,21 @@ download.file(
 )
 unzip(temp, exdir='factordata')
 
-dat <- readLines('factordata/F-F_Momentum_Factor.CSV')
+datmom <- readLines('factordata/F-F_Momentum_Factor.CSV')
 
-keep <- as.numeric(substr(dat, 1, 6))
+keep <- as.numeric(substr(datmom, 1, 6))
 keep[is.na(keep)] <- 0
 keep <- keep>10000
-dat <- dat[keep]
-dat <- read.csv(textConnection(dat), header = F)
-colnames(dat) <- c('yearmon', 'MOM')
-write.table(dat, 'factordata/mom.csv', sep = ',', row.names = F, col.names = T)
+datmom <- datmom[keep]
+datmom <- read.csv(textConnection(datmom), header = F)
+colnames(datmom) <- c('yearmon', 'MOM')
+FF5dat <- left_join(dat, datmom , 'yearmon')
 
 # Bond Factors; 10 year treasury, 3 month T-Bill rate, corporate bond yield
 Ten_yr<- tq_get("DGS10",get  = "economic.data",from=Sys.Date()-years(30)) %>% na.omit
 
 # Alternative Risk Factors
+
 
 #Import screened list from Morningstar export
 
@@ -91,4 +92,10 @@ fund.returns <- fund.prices %>%
                period     = "monthly", 
                col_rename = "fund.returns",
                indexAt = "lastof") 
+
+#Term and Credit
+Ten_yr <- getSymbols.FRED("CPIAUNCS", env = "economic.data")
+Ten_yr<- tq_get("DGS10",get  = "economic.data",from=Sys.Date()-years(30)) %>% na.omit
+CorpYield <- tq_get("DBAA",get  = "economic.data",from=Sys.Date()-years(30)) %>% na.omit 
+CreditSpread <- left_join(Ten_yr, CorpYield, 'date') 
 
