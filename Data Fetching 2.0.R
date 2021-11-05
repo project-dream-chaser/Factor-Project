@@ -64,7 +64,7 @@ FF5dat <- left_join(dat, datmom , 'yearmon')
 Ten_yr<- tq_get("DGS10",get  = "economic.data",from=Sys.Date()-years(30)) %>% na.omit
 
 # Alternative Risk Factors
-
+TFFac <- read_csv('factordata/TF-Fac-6.CSV')
 
 #Import screened list from Morningstar export
 
@@ -97,5 +97,10 @@ fund.returns <- fund.prices %>%
 Ten_yr <- getSymbols.FRED("CPIAUNCS", env = "economic.data")
 Ten_yr<- tq_get("DGS10",get  = "economic.data",from=Sys.Date()-years(30)) %>% na.omit
 CorpYield <- tq_get("DBAA",get  = "economic.data",from=Sys.Date()-years(30)) %>% na.omit 
-CreditSpread <- left_join(Ten_yr, CorpYield, 'date') 
+CreditSpreadTemp <- left_join(Ten_yr, CorpYield, 'date') 
+CreditSpreadTemp <- as.Date('date',format="%d%m%Y")
+CreditSpread <- CreditSpreadTemp %>% 
+  dplyr:: mutate(spread = price.y - price.x)
 
+#Combining data sets
+Factor8 <- 
